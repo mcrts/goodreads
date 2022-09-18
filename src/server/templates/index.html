@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <title>Goodreads | Curator</title>
+  <meta name="author" content="Martin Courtois">
+  <style>
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    table td {
+      border: 1px solid #cccccc;
+    }
+    td {
+      height: 80px;
+      width: 160px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    form {
+      text-align: center;
+    }
+  </style>
+</head>
+
+
+<body>
+  <form class="center" action="{{ url_for('index') }}" method="get">
+    <div>
+      <label for="userid">User Id:</label>
+      <input type="text" id="userid" name="userid">
+    </div>
+    <div>
+      <label for="book-search">Search a book:</label>
+      <input type="search" id="book-search" name="q">
+    </div>
+    <div>
+      <input type="submit" value="Search">
+    </div>
+  </form>
+
+  <table class="center">
+    {% for irow in range(4) %}
+    <tr>
+      {% for icol in range(4) %}
+      {% set item = items[irow * 4 + icol] %}
+      <td>
+        <p><b>{{ item.title }}</b></p>
+        <img
+          src="{{ item.imgurl }}"
+          alt="{{ item.title }}">
+        </img>
+        <p>Rank: {{ irow * 4 + icol + 1 }} | Relevance: {{ "%.2f"|format(item.relevance) }} | Affinity: {{ "%.2f"|format(item.affinity) }} | Rating: {{ item.rating }}</p>
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+</body>
