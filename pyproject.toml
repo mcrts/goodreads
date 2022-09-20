@@ -9,6 +9,7 @@ packages = [{include = "goodreads", from = "src"}]
 python = "^3.8"
 flask = "^2.2.2"
 fire = "^0.4.0"
+Whoosh = "^2.7.4"
 
 [tool.poetry.scripts]
 goodreads = 'goodreads.cli:main'
