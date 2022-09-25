@@ -2,7 +2,8 @@ from whoosh import index, qparser, scoring
 
 
 class Document:
-    def __init__(self, title, imgurl, relevance, rating, affinity=0):
+    def __init__(self, bookid, title, imgurl, relevance, rating, affinity=0):
+        self.bookid = bookid
         self.title = title
         self.imgurl = imgurl
         self.relevance = relevance
@@ -13,6 +14,7 @@ class Document:
     def fromHit(cls, hit):
         data = hit.fields()
         doc = cls(
+            bookid=data.get("book_id", ""),
             title=data.get("title", ""),
             imgurl=data.get("image_url", ""),
             relevance=hit.score,

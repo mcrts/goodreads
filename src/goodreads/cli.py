@@ -12,10 +12,12 @@ class ServerCommand:
     def __init__(self, appdir):
         self.appdir = Path(appdir)
         self.indexdir = self.appdir / "index"
+        self.rankdir = self.appdir / "ranker"
 
     def run(self):
         app.config["APPDIR"] = self.appdir
         app.config["INDEXDIR"] = self.indexdir
+        app.config["RANKDIR"] = self.rankdir
         app.run(debug=True, port=5000)
 
 class IndexCommand:
@@ -37,11 +39,9 @@ class RankerCommand:
    
     def add(self, src):
         self.ranker.add_reviews(src)
-
-    def test(self):
-        print(len(self.ranker.user_index.index))
-        print(len(self.ranker.book_index.index))
-        print(self.ranker.csr_matrix.size)
+    
+    def train(self):
+        self.ranker.train()
 
 class Command:
     def __init__(self, appdir):

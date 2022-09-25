@@ -8,17 +8,8 @@ import pickle
 
 from bidict import bidict
 from scipy.sparse import coo_array, save_npz, load_npz
-
-
-def score_document(userid, document):
-    return random.random()
-
-def rank_documents(userid, documents):
-    ranked_documents = []
-    for d in documents:
-        d.affinity = score_document(userid, d)
-        ranked_documents.append(d)
-    return sorted(ranked_documents, key=lambda d: d.affinity, reverse=True)
+import numpy as np
+import implicit
 
 @dataclass
 class TokenIndex:
@@ -51,6 +42,10 @@ def reviews_to_coo(reviews):
 
 
 class Ranker:
+    FACTORS = 50
+    ITERATIONS = 50
+    REG_L1 = 0.01
+
     def __init__(self, rankdir):
         self.rankdir = rankdir
         self.matrixpath = self.rankdir / "interactions.npz"
@@ -59,6 +54,8 @@ class Ranker:
         self.user_index = TokenIndex()
         self.book_index = TokenIndex()
         self.csr_matrix = None
+        self.modelpath = self.rankdir / "model.npz"
+        self.model = None
         self.initialize()
     
     def initialize(self):
@@ -76,6 +73,9 @@ class Ranker:
                 pickle.dump(self.user_index, fp)
             with open(self.bookindexpath, 'wb') as fp:
                 pickle.dump(self.book_index, fp)
+        
+        if self.modelpath.exists():
+            self.model = implicit.cpu.als.AlternatingLeastSquares.load(self.modelpath)
     
     def get_userid(self, user):
         return self.user_index.get_id(user)
@@ -101,3 +101,21 @@ class Ranker:
             pickle.dump(self.user_index, fp)
         with open(self.bookindexpath, 'wb') as fp:
             pickle.dump(self.book_index, fp)
+
+    def train(self):
+        model = implicit.als.AlternatingLeastSquares(
+            factors=self.FACTORS,
+            regularization=self.REG_L1,
+            dtype=np.float,
+            iterations=self.ITERATIONS
+        )
+        model.fit(self.csr_matrix)
+        model.save(self.modelpath)
+        self.model = model
+
+    def rank_book(self, user, book):
+        userid = self.get_userid(user)
+        bookid = self.get_bookid(book)
+        csr = self.csr_matrix.tocsr()
+        score, _, _ = self.model.explain(userid, csr, bookid)
+        return score

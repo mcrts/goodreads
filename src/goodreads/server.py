@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 
 from .search import search_document, Document
-from .ranker import rank_documents
+from .ranker import Ranker
 
 PAGELEN = 16
 app = Flask(__name__)
@@ -11,15 +11,29 @@ MOCKDOCUMENT = Document('No Results', 'https://t4.ftcdn.net/jpg/04/73/25/49/360_
 
 @app.route("/", methods=["GET"])
 def index():
+    indexdir = app.config["INDEXDIR"]
+    rankdir = app.config["RANKDIR"]
     args = request.args
 
-    indexdir = app.config["INDEXDIR"]
-    userid = args.get("userid", default=0, type=int)
-    querystring = args.get("q", default="captain america", type=str)
+    querystring = args.get("q", default=None, type=str)
+    if querystring:
+        print("there is a query :", querystring)
+        search_results = search_document(indexdir, querystring, PAGELEN)
+    else:
+        print("no query")
+        search_results = search_document(indexdir, "", PAGELEN)
 
-    search_results = search_document(indexdir, querystring, PAGELEN)
-    ranked_results = rank_documents(userid, search_results)
+    user = args.get("userid", default=None, type=str)
+    if user:
+        print("there is a user :", user)
+        ranker = Ranker(rankdir)
+        for d in search_results:
+            d.affinity = ranker.rank_book(user, d.bookid)
+        ranked_results = sorted(search_results, key=lambda d: d.affinity, reverse=True)
+    else:
+        print("no user")
+        ranked_results = search_results
+
     if len(ranked_results) < PAGELEN:
         ranked_results.extend([MOCKDOCUMENT for _ in range(PAGELEN - len(ranked_results))])
-
     return render_template("index.html", items=ranked_results)
