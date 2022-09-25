@@ -1,5 +1,6 @@
 import os
 import json
+from collections import Counter
 from itertools import islice
 
 from whoosh.fields import Schema, TEXT, STORED, ID, NUMERIC
@@ -71,3 +72,23 @@ def add_source_file(indexdir, src):
         print(f"Add {src} documents to {indexdir} index.")
         documents = (json.loads(l) for l in fp.readlines())
         add_documents(indexdir, documents)
+
+
+def find_most_active_users(interactions_file):
+    with open(interactions_file, "r") as fp:
+        documents = (json.loads(l) for l in fp.readlines())
+        documents = filter(lambda d: d.get('is_read'), documents)
+        documents = (d.get('user_id') for d in documents)
+        counter = Counter(documents)
+    return counter
+
+def find_reviews(indexdir, interactions_file, user):
+    ix = index.open_dir(indexdir)
+    with open(interactions_file, "r") as fp, ix.searcher() as searcher:
+        documents = (json.loads(l) for l in fp.readlines())
+        documents = filter(lambda d: d.get('is_read'), documents)
+        documents = filter(lambda d: d.get('user_id') == user, documents)
+        documents = ((searcher.document(book_id=d.get('book_id')).get('title'), d.get('rating')) for d in documents)
+        documents = list(documents)
+    return documents
+

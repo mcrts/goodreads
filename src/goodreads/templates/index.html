@@ -31,11 +31,11 @@
   <form class="center" action="{{ url_for('index') }}" method="get">
     <div>
       <label for="userid">User Id:</label>
-      <input type="text" id="userid" name="userid">
+      <input type="text" id="userid" name="userid" autocomplete="on" value="{{ userid }}">
     </div>
     <div>
       <label for="book-search">Search a book:</label>
-      <input type="search" id="book-search" name="q">
+      <input type="search" id="book-search" name="q" autocomplete="on" value="{{ q }}">
     </div>
     <div>
       <input type="submit" value="Search">

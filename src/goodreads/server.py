@@ -18,10 +18,10 @@ def index():
     querystring = args.get("q", default=None, type=str)
     if querystring:
         print("there is a query :", querystring)
-        search_results = search_document(indexdir, querystring, PAGELEN)
+        search_results = search_document(indexdir, querystring, 4*PAGELEN)
     else:
         print("no query")
-        search_results = search_document(indexdir, "", PAGELEN)
+        search_results = search_document(indexdir, "", 4*PAGELEN)
 
     user = args.get("userid", default=None, type=str)
     if user:
@@ -36,4 +36,8 @@ def index():
 
     if len(ranked_results) < PAGELEN:
         ranked_results.extend([MOCKDOCUMENT for _ in range(PAGELEN - len(ranked_results))])
-    return render_template("index.html", items=ranked_results)
+    else:
+        ranked_results = ranked_results[:PAGELEN]
+
+    res = render_template("index.html", items=ranked_results, userid=user, q=querystring)
+    return res
