@@ -6,10 +6,13 @@ authors = ["Martin Courtois <martin.courtois@protonmail.com>"]
 packages = [{include = "goodreads", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "3.8.10"
 flask = "^2.2.2"
 fire = "^0.4.0"
 Whoosh = "^2.7.4"
+bidict = "^0.22.0"
+numpy = "^1.23.3"
+scipy = "^1.9.1"
 
 [tool.poetry.scripts]
 goodreads = 'goodreads.cli:main'

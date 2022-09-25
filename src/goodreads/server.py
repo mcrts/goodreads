@@ -12,7 +12,6 @@ MOCKDOCUMENT = Document('No Results', 'https://t4.ftcdn.net/jpg/04/73/25/49/360_
 @app.route("/", methods=["GET"])
 def index():
     args = request.args
-    print(args)
 
     indexdir = app.config["INDEXDIR"]
     userid = args.get("userid", default=0, type=int)
